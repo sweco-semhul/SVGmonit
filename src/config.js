@@ -2,7 +2,8 @@ const config = {
   server:{
     svgFile: '/svg-image/test.svg',
     httpPort: 3000,
-    wsPort: 8080
+    wsPort: 8080,
+    checkIntreval: 5000
   },
   client: {
     wsUrl: 'ws://localhost:8080',

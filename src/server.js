@@ -70,7 +70,7 @@ fs.readFile(__dirname + config.server.svgFile, function (err, data) {
 
     ws.send(JSON.stringify(checks));
     check(checks);
-    setInterval(function() { check(checks); }.bind(this),5000);
+    setInterval(function() { check(checks); }.bind(this), config.server.checkInterval);
   });
 });
 
