@@ -31,7 +31,7 @@ var ws = {
 }
 
 // Websocket server
-const wss = new WebSocket.Server({ port: 8080 })
+const wss = new WebSocket.Server({ port: config.server.wsPort })
 // When a connection is made set that socket as correct one
 // This means that only the last connection will be used!
 wss.on('connection', _ws => {
@@ -115,7 +115,7 @@ function serv(svg) {
       next();
     })
     .use(serveStatic(__dirname))
-    .listen(3000, () => console.log('Server running on port 3000'));
+    .listen(config.server.httpPort, () => console.log('Server running on port ' + config.server.httpPort));
 
   
   
