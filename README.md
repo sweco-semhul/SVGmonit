@@ -1,7 +1,9 @@
 # SVGmonit, turn a system overview in SVG into a live network monitor
 
 The simplest live system overview monitor that runs http checks directly from an in SVG thats for example exported from yEd. Add CHECK-tag to any HTTP/HTTPS endpoint to the SVG and thats it.
-Small Node-server updating the SVG with status colors of i.e. a network link between two systems.
+Small Node.js-server updating the SVG with status colors of i.e. a network link between two systems.
+
+Today the only check is if the url returns 200 ok.
 
 ![Example](SVGmonit.gif)
 
