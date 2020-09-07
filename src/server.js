@@ -82,7 +82,8 @@ fs.readFile(__dirname + config.server.svgFile, function (err, data) {
 function ping(check) {
   request.get({
     url: check.url,
-    time : true
+    time : true,
+    timeout: config.server.checkInterval - 10
   }, function (error, response, body) {
     // Store last check information on the check
     check.last = {
@@ -93,6 +94,9 @@ function ping(check) {
       error: error,
       statusCode: response ? response.statusCode : {}
     };
+    if(config.server.debug) {
+      console.log(check.url, check.last);
+    }
     // Send to the client
     ws.send(JSON.stringify(check));
   });

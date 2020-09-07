@@ -32,6 +32,6 @@ ws.onopen    = function(event) { setStatus('WebSocket connected to server at ' +
 ws.onmessage = function(event) { 
   var jsonMessage = JSON.parse(event.data);
   // Set status and update svg
-  setStatus(jsonMessage.name + ' updated')
+  setStatus(jsonMessage.name + ' updated. ' + jsonMessage.last.statusCode );
   updateSVG(jsonMessage); 
 }

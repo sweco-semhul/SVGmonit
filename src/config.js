@@ -3,7 +3,8 @@ const config = {
     svgFile: '/svg-image/test.svg',
     httpPort: 3000,
     wsPort: 8080,
-    checkInterval: 5000
+    checkInterval: 5000,
+    debug: true
   },
   client: {
     wsUrl: 'ws://localhost:8080',
