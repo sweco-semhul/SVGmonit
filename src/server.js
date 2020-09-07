@@ -55,20 +55,23 @@ fs.readFile(__dirname + config.server.svgFile, function (err, data) {
         name: checkSrc[1],
         url: checkSrc[2],
         id: o.$.id.replace('tooltip.', '')
-      }
+      };
       checks.push(check);
       o.g[0].text[0]._ = check.name + ' ' + check.url;
     });
-    console.log(checks)
+    console.log('Checks parsed from SVG-image:');
+    console.log(checks);
 
-
+    // Build SVG from JS-object
     var builder = new xml2js.Builder();
     var svg = builder.buildObject(result);
+    // Serve SVG image
     serv(svg);
     
-    console.dir(result);
-
+    // Send checks to client
     ws.send(JSON.stringify(checks));
+
+    // Start running checks
     check(checks);
     setInterval(function() { check(checks); }.bind(this), config.server.checkInterval);
   });
@@ -89,9 +92,9 @@ function ping(check) {
       requestTime: response ? response.elapsedTime : -1,
       error: error,
       statusCode: response ? response.statusCode : {}
-    }
+    };
     // Send to the client
-    ws.send(JSON.stringify(check))
+    ws.send(JSON.stringify(check));
   });
 
 }
@@ -102,8 +105,6 @@ function check(checks) {
     ping(c);
   });
 }
-
-
 
 function serv(svg) {
 
@@ -116,8 +117,5 @@ function serv(svg) {
     })
     .use(serveStatic(__dirname))
     .listen(config.server.httpPort, () => console.log('Server running on port ' + config.server.httpPort));
-
-  
-  
   
 }
