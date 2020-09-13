@@ -1,13 +1,12 @@
 var statusElementId = 'status';
 var svgElementId = 'svg-image';
 
-var ws = new WebSocket(config.client.wsUrl);
 
 function setStatus(status) {
   document.getElementById(statusElementId).innerHTML = (new Date()).toISOString() + ' ' + status;
 }
 
-function updateSVG(jsonMsg) {
+function updateSVG(jsonMsg, addEventListener) {
   console.log(jsonMsg);
 
   var a = document.getElementById(svgElementId);
@@ -15,23 +14,76 @@ function updateSVG(jsonMsg) {
   var svgDoc = a.contentDocument;
 
   // Change color of linked element
-  var color = jsonMsg.last.statusCode === 200 ? config.client.color.ok : config.client.color.notOk;
+  var color;
+  switch (jsonMsg.last.statusCode) {
+    case 200:
+      color = config.client.color.ok;
+      break;
+    case 404:
+      color = config.client.color.notOk;
+      break;
+    default:
+      color = config.client.color.notOk;
+      break;
+  }
   var svgElement = svgDoc.getElementById(jsonMsg.id);
-  svgElement.children[0].setAttribute('fill', color);
-  svgElement.children[0].setAttribute('stroke', color);
+  if(svgElement) {
+    svgElement.children[0].setAttribute('fill', color);
+    svgElement.children[0].setAttribute('stroke', color);
 
-  // Change tooltip content
-  var tooltip = svgDoc.getElementById('tooltip.'+jsonMsg.id);
-  tooltip.children[0].getElementsByTagName('text')[0].innerHTML = jsonMsg.name + ' ' + jsonMsg.last.when + ' ' + jsonMsg.last.statusCode + ' ' + jsonMsg.last.requestTime + 'ms';
+    // Change tooltip content
+    var tooltip = svgDoc.getElementById('tooltip.'+jsonMsg.id);
+    var statusMsg = '';
+    if(jsonMsg.last.error) {
+      statusMsg = jsonMsg.last.error.code + ' ' + jsonMsg.last.error.errno;
+    } else {
+      statusMsg = jsonMsg.last.statusCode + ' ' + jsonMsg.last.requestTime + 'ms';
+    }
+    tooltip.children[0].getElementsByTagName('text')[0].innerHTML = jsonMsg.name + ' ' + jsonMsg.last.when + ' ' + statusMsg;
+
+    if(addEventListener) {
+      // Add link from check
+      svgElement.setAttribute('check-link', jsonMsg.last.url);
+      svgElement.style.cursor = 'pointer';
+      svgElement.addEventListener('click', function(event) {
+        window.open(event.currentTarget.getAttribute('check-link'), '_blank');
+      });
+    }
+    
+  } else {
+    console.error('SVG element', jsonMsg.id, 'not found');
+  }
+
+  //debugger;
 }
 
-// Bind to web socket events
-ws.onclose   = function(event) { setStatus('Web socket connection closed'); }
-ws.onerror   = function(event) { setStatus(JSON.stringify(event,0,2)); }
-ws.onopen    = function(event) { setStatus('WebSocket connected to server at ' + config.client.wsUrl); };
-ws.onmessage = function(event) { 
-  var jsonMessage = JSON.parse(event.data);
-  // Set status and update svg
-  setStatus(jsonMessage.name + ' updated. ' + jsonMessage.last.statusCode );
-  updateSVG(jsonMessage); 
+
+function initWS() {
+  var ws = new WebSocket(config.client.wsUrl);
+
+  // Bind to web socket events
+  ws.onclose   = function(event) { setStatus('Web socket connection closed'); }
+  ws.onerror   = function(event) { setStatus(JSON.stringify(event,0,2)); }
+  ws.onopen    = function(event) { setStatus('WebSocket connected to server at ' + config.client.wsUrl); };
+  ws.onmessage = function(event) { 
+    var jsonMessage = JSON.parse(event.data);
+    // TODO! create a better message format
+    // First message will be all checks
+    if(Array.isArray(jsonMessage)) { 
+      jsonMessage.forEach(function(message) {
+        message.url.split('\/\/')
+        setStatus(message.name + ' updated. ' + message.last.statusCode );
+        updateSVG(message, true);
+      });
+    } else {
+      // Set status and update svg
+      setStatus(jsonMessage.name + ' updated. ' + jsonMessage.last.statusCode );
+      updateSVG(jsonMessage);
+    }
+  }
+}
+
+// Connect to web socket when page has loaded
+window.onload = function() {
+  initWS();
 }
