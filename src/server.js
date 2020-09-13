@@ -51,13 +51,17 @@ fs.readFile(__dirname + config.server.svgFile, function (err, data) {
     }, function (o) {
       // Find url and name and parse linked svg item id
       let checkSrc = o.g[0].text[0]._.split('|');
-      let check = {
-        name: checkSrc[1],
-        url: checkSrc[2],
-        id: o.$.id.replace('tooltip.', '')
-      };
-      checks.push(check);
-      o.g[0].text[0]._ = check.name + ' ' + check.url;
+      if(checkSrc.length > 0) {
+        let check = {
+          name: checkSrc[1].split('//')[1].split('?')[0],
+          url: checkSrc[1],
+          id: o.$.id.replace('tooltip.', '')
+        };
+        checks.push(check);
+        o.g[0].text[0]._ = check.url;
+      } else {
+        console.error('Failed to parse check url for', checkSrc);
+      } 
     });
     console.log('Checks parsed from SVG-image:');
     console.log(checks);
