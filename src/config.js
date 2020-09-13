@@ -1,15 +1,25 @@
+var ENV = {};
+if(typeof process !== 'undefined' && process.hasOwnProperty('env')) {
+  ['CHECK_INTERVAL', 'DEBUG'].forEach(function(envName) {
+    if(process.env.hasOwnProperty(envName)) {
+      ENV[envName] = process.env[envName];
+    }
+  });
+}
+
 const config = {
   server: {
     svgFile: '/svg-image/test.svg',
     httpPort: 3000,
-    wsPort: 8080,
-    checkInterval: 5000,
-    debug: true
+    wsPort: 3001,
+    checkInterval: ENV.CHECK_INTERVAL ? ENV.CHECK_INTERVAL : 30000,
+    debug: ENV.DEBUG ? true : false
   },
   client: {
-    wsUrl: 'ws://localhost:8080',
+    wsUrl: typeof WS_URL !== "undefined" ? WS_URL : 'ws://localhost:3001',
     color: {
       ok: 'lime',
+      noResponse: 'orange',
       notOk: 'red'
     }
   }
