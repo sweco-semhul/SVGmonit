@@ -6,36 +6,21 @@ const request = require('request');
 const WebSocket = require('ws');
 const config = require('./config').config;
  
-// Travers nested js-object, use finder method to check all items on the object, apply changer when finder returns true 
-function find(o, finder, changer) {
-  if( finder(o) ){
-    changer(o);
-  }
-  var result, p; 
-  for (p in o) {
-      if( o.hasOwnProperty(p) && typeof o[p] === 'object' ) {
-          result = find(o[p], finder, changer);
-          if(result){
-              return result;
-          }
-      }
-  }
-  return result;
-}
 
 var checks = [];
 
 // Mock websocket server send to client, before any client has connected
-var ws = {
-  send: function() {}
-}
+var CLIENTS = [];
+
 
 // Websocket server
 const wss = new WebSocket.Server({ port: config.server.wsPort })
 // When a connection is made set that socket as correct one
 // This means that only the last connection will be used!
-wss.on('connection', _ws => {
-  ws = _ws;
+wss.on('connection', ws => {
+  CLIENTS.push(ws);
+  // Send checks to client
+  sendAll(JSON.stringify(checks));
 });
 
 // Parse the SVG image
@@ -71,9 +56,6 @@ fs.readFile(__dirname + config.server.svgFile, function (err, data) {
     var svg = builder.buildObject(result);
     // Serve SVG image
     serv(svg);
-    
-    // Send checks to client
-    ws.send(JSON.stringify(checks));
 
     // Start running checks
     check(checks);
@@ -96,13 +78,13 @@ function ping(check) {
       when: new Date(),
       requestTime: response ? response.elapsedTime : -1,
       error: error,
-      statusCode: response ? response.statusCode : {}
+      statusCode: response ? response.statusCode : 418
     };
     if(config.server.debug) {
-      console.log(check.url, check.last);
+      console.log(check.last);
     }
     // Send to the client
-    ws.send(JSON.stringify(check));
+    sendAll(JSON.stringify(check));
   });
 
 }
@@ -120,10 +102,33 @@ function serv(svg) {
   connect()
     .use('/svg', function fooMiddleware(req, res, next) {
       res.end(svg);
-      // req.url starts with "/foo"
       next();
     })
     .use(serveStatic(__dirname))
     .listen(config.server.httpPort, () => console.log('Server running on port ' + config.server.httpPort));
   
+}
+
+// Travers nested js-object, use finder method to check all items on the object, apply changer when finder returns true 
+function find(o, finder, changer) {
+  if( finder(o) ){
+    changer(o);
+  }
+  var result, p; 
+  for (p in o) {
+      if( o.hasOwnProperty(p) && typeof o[p] === 'object' ) {
+          result = find(o[p], finder, changer);
+          if(result){
+              return result;
+          }
+      }
+  }
+  return result;
+}
+
+
+function sendAll(msg) {
+  CLIENTS.forEach(ws => {
+    ws.send(msg);
+  });
 }
