@@ -9,7 +9,7 @@ Today the only check is if the url returns 200 ok.
 
 ## Get started
 1. Draw a system overview in [yEd](https://www.yworks.com/products/yed)
-2. On one or more elements under "Data" add "Description", CHECK|{NAME}|{URL} ex. CHECK|Example API|http://exemple.com
+2. On one or more elements under "Data" add "Description", CHECK|{URL} ex. CHECK|http://exemple.com
 3. Export to SVG-format
 4. Place in svg-img folder
 5. Update config.js
