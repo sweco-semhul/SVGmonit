@@ -4,9 +4,7 @@
   color: #595959;
 }
 
-object { 
-  width: 100%;
-  height: 100%;
-  top:0;
-  right:0; 
+#svg-image {
+  min-width: 100%;
+  min-height: 100vh;
 }
