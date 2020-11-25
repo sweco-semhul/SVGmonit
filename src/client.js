@@ -1,9 +1,14 @@
 var statusElementId = 'status';
 var svgElementId = 'svg-image';
+var statusQueue = [];
 
 
-function setStatus(status) {
-  document.getElementById(statusElementId).innerHTML = (new Date()).toISOString() + ' ' + status;
+function setStatus(code, check, name, msg) {
+  statusQueue.unshift('<span' + (code < 498 ? '' : ' class="error"') + '>' + (new Date()).toISOString() + ' ' + code + ' ' + (check ? ('<a href="' + check + '" target="_blank">' + name + '</a>') : '') + msg + '</span>');
+  document.getElementById(statusElementId).innerHTML = statusQueue.join('<br>');
+  if(statusQueue.length > 100) {
+    statusQueue.pop();
+  }
 }
 
 function updateSVG(jsonMsg, addEventListener) {
@@ -63,9 +68,9 @@ function initWS() {
   var ws = new WebSocket(wsUrl);
 
   // Bind to web socket events
-  ws.onclose   = function(event) { setStatus('Web socket connection closed'); }
-  ws.onerror   = function(event) { setStatus(JSON.stringify(event,0,2)); }
-  ws.onopen    = function(event) { setStatus('WebSocket connected to server at ' + config.client.wsUrl); };
+  ws.onclose   = function(event) { setStatus(500, null, 'Web socket connection closed'); }
+  ws.onerror   = function(event) { setStatus(500, null, JSON.stringify(event,0,2)); }
+  ws.onopen    = function(event) { setStatus(200, null, 'WebSocket connected to server at ' + wsUrl); };
   ws.onmessage = function(event) { 
     var jsonMessage = JSON.parse(event.data);
     // TODO! create a better message format
@@ -73,12 +78,14 @@ function initWS() {
     if(Array.isArray(jsonMessage)) { 
       jsonMessage.forEach(function(message) {
         message.url.split('\/\/')
-        setStatus(message.name + ' updated. ' + message.last.statusCode );
-        updateSVG(message, true);
+        if(message.last) {
+          setStatus(message.last.statusCode, message.last.url, message.name, ' updated. ' + (JSON.stringify(message.last.error) || '') );
+          updateSVG(message, true);
+        }
       });
-    } else {
+    } else {  
       // Set status and update svg
-      setStatus(jsonMessage.name + ' updated. ' + jsonMessage.last.statusCode );
+      setStatus(jsonMessage.last.statusCode, jsonMessage.last.url, jsonMessage.name, ' updated. ' + (JSON.stringify(jsonMessage.last.error) && jsonMessage.last.error.code || '') );
       updateSVG(jsonMessage);
     }
   }
@@ -88,3 +95,4 @@ function initWS() {
 window.onload = function() {
   initWS();
 }
+    
