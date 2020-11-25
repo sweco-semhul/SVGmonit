@@ -10,7 +10,7 @@
         <path d="M134 170 L840 170 L840 230 L134 230 L134 170 Z"/>
       </clipPath>
       <clipPath clipPathUnits="userSpaceOnUse" id="clipPath3">
-        <path d="M0 0 L0 18 L198 18 L198 0 Z"/>
+        <path d="M0 0 L0 18 L318 18 L318 0 Z"/>
       </clipPath>
       <clipPath clipPathUnits="userSpaceOnUse" id="clipPath4">
         <path d="M0 0 L0 46 L123 46 L123 0 Z"/>
@@ -123,8 +123,8 @@
     </g>
     <g visibility="hidden" id="tooltip.y.edge.0" pointer-events="none">
       <g fill="rgb(255,255,204)" text-rendering="geometricPrecision" font-size="11px" shape-rendering="geometricPrecision" font-family="'Lucida Grande'" stroke="rgb(255,255,204)">
-        <rect x="0" width="198" height="18" y="0" clip-path="url(#clipPath3)" stroke="none"/>
-        <text fill="black" x="3" xml:space="preserve" y="13" clip-path="url(#clipPath3)" stroke="none">CHECK|https://favqs.com/api/qotd</text>
+        <rect x="0" width="318" height="18" y="0" clip-path="url(#clipPath3)" stroke="none"/>
+        <text fill="black" x="3" xml:space="preserve" y="13" clip-path="url(#clipPath3)" stroke="none">CHECK|https://favqs.com/api/qotd?apikey={FAV_APIKEY}</text>
       </g>
     </g>
     <g visibility="hidden" id="tooltip.y.edge.1" pointer-events="none">

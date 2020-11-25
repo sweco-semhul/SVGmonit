@@ -15,3 +15,6 @@ Today the only check is if the url returns 200 ok.
 5. Update config.js
 5. `npm install`
 6. `npm start`
+
+## Docker secrets
+Docker secrets can be used on the CHECK url in the SVG by adding `{SOMETHING_APIKEY}` then it will be replaced by the content in /run/secrets/SOMETHING_APIKEY

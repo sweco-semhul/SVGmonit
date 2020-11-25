@@ -50,7 +50,7 @@
     </node>
     <edge id="e0" source="n0" target="n1">
       <data key="d8" xml:space="preserve"/>
-      <data key="d9" xml:space="preserve"><![CDATA[CHECK|https://favqs.com/api/qotd]]></data>
+      <data key="d9" xml:space="preserve"><![CDATA[CHECK|https://favqs.com/api/qotd?apikey={FAV_APIKEY}]]></data>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>

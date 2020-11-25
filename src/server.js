@@ -5,13 +5,14 @@ const serveStatic = require('serve-static');
 const request = require('request');
 const WebSocket = require('ws');
 const config = require('./config').config;
- 
+var path = require('path');
+const SECRETS_DIR = '/run/secrets';
+const SECRETS = readSecrets(); 
 
 var checks = [];
 
 // Mock websocket server send to client, before any client has connected
 var CLIENTS = [];
-
 
 // Websocket server
 const wss = new WebSocket.Server({ port: config.server.wsPort })
@@ -39,7 +40,7 @@ fs.readFile(__dirname + config.server.svgFile, function (err, data) {
       if(checkSrc.length > 0) {
         let check = {
           name: checkSrc[1].split('//')[1].split('?')[0],
-          url: checkSrc[1],
+          url: parseKey(checkSrc[1]),
           id: o.$.id.replace('tooltip.', '')
         };
         checks.push(check);
@@ -62,6 +63,45 @@ fs.readFile(__dirname + config.server.svgFile, function (err, data) {
     setInterval(function() { check(checks); }.bind(this), config.server.checkInterval);
   });
 });
+
+
+function parseKey(url) {
+  let apiKeyNames = url.match(/{.*APIKEY}/);
+  if(apiKeyNames && apiKeyNames.length > 0) {
+    let apiKeyName = apiKeyNames[0].replace(/{|}/g,'');
+    console.log('Found key', apiKeyName , 'in url', url);
+    let secret = SECRETS[apiKeyName];
+    if(secret) {
+      url = url.replace('{'+apiKeyName+'}', secret);
+    } else {
+      console.warn('Secret',apiKeyName,'not found');
+    }
+  }
+  return url;
+}
+
+function readSecrets() {
+  const secrets = {};
+  console.log(SECRETS_DIR);
+  if (fs.existsSync(SECRETS_DIR)) {
+    try {
+      const files = fs.readdirSync(SECRETS_DIR);
+
+      files.forEach(function(file) {
+        const fullPath = path.join(SECRETS_DIR, file);
+        try {
+          const data = fs.readFileSync(fullPath, 'utf8').toString().trim();
+          secrets[file] = data;
+        } catch (err) {
+          console.error('Failed to parse secret', err);
+        }
+      });
+    } catch (err) {
+      console.log('Failed to read secrets', err);
+    }
+  }
+  return secrets;
+}
 
 
 // Make a GET-request to check if the service is up
