@@ -16,7 +16,7 @@ const config = {
     debug: ENV.DEBUG ? true : false
   },
   client: {
-    wsUrl: typeof WS_URL !== "undefined" ? WS_URL : 'ws://localhost:3001',
+    wsPort: 3001,
     color: {
       ok: 'lime',
       noResponse: 'orange',

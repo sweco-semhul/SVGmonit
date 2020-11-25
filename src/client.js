@@ -59,7 +59,8 @@ function updateSVG(jsonMsg, addEventListener) {
 
 
 function initWS() {
-  var ws = new WebSocket(config.client.wsUrl);
+  var wsUrl =  'ws://' + window.location.hostname + ':' +  config.client.wsPort;
+  var ws = new WebSocket(wsUrl);
 
   // Bind to web socket events
   ws.onclose   = function(event) { setStatus('Web socket connection closed'); }

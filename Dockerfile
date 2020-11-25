@@ -8,4 +8,4 @@ COPY . ./
 
 RUN npm install
 
-ENTRYPOINT [ "./start.sh" ]
+ENTRYPOINT [ "npm", "start" ]
