@@ -1,6 +1,6 @@
 var ENV = {};
 if(typeof process !== 'undefined' && process.hasOwnProperty('env')) {
-  ['CHECK_INTERVAL', 'DEBUG'].forEach(function(envName) {
+  ['CHECK_INTERVAL', 'DEBUG', 'SVG_FILE', 'SECRETS_DIR'].forEach(function(envName) {
     if(process.env.hasOwnProperty(envName)) {
       ENV[envName] = process.env[envName];
     }
@@ -9,14 +9,15 @@ if(typeof process !== 'undefined' && process.hasOwnProperty('env')) {
 
 const config = {
   server: {
-    svgFile: '/svg-image/test.svg',
-    httpPort: 3000,
-    wsPort: 3001,
+    svgFile: ENV.SVG_FILE ? ENV.SVG_FILE : './svg-image/test.svg',
+    secretsDir: ENV.SECRETS_DIR ? ENV.SECRETS_DIR : '/run/secrets',
+    httpPort: 19000,
+    wsPort: 19001,
     checkInterval: ENV.CHECK_INTERVAL ? ENV.CHECK_INTERVAL : 30000,
     debug: ENV.DEBUG ? true : false
   },
   client: {
-    wsPort: 3001,
+    wsPort: 19001,
     color: {
       ok: 'lime',
       noResponse: 'orange',

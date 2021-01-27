@@ -6,7 +6,7 @@ const request = require('request');
 const WebSocket = require('ws');
 const config = require('./config').config;
 var path = require('path');
-const SECRETS_DIR = '/run/secrets';
+const SECRETS_DIR = config.server.secretsDir;
 const SECRETS = readSecrets(); 
 
 var checks = [];
@@ -26,7 +26,7 @@ wss.on('connection', ws => {
 
 // Parse the SVG image
 var parser = new xml2js.Parser();
-fs.readFile(__dirname + config.server.svgFile, function (err, data) {
+fs.readFile(config.server.svgFile, function (err, data) {
   if(err) {
     console.log(err);
   }
