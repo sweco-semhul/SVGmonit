@@ -113,13 +113,25 @@ function ping(check) {
     timeout: config.server.checkInterval - 10
   }, function (error, response, body) {
     // Store last check information on the check
+    let statusCode = 418;
+    if(response) {
+      statusCode = response.statusCode;
+    } else if(error && error.code) {
+      switch (error.code) {
+        case 'ENOTFOUND':
+          statusCode = 503;
+          break;
+        case 'DEPTH_ZERO_SELF_SIGNED_CERT':
+          statusCode = 526;
+      }
+    } 
     check.last = {
       url: check.url,
       headers: response ? response.headers : {},
       when: new Date(),
       requestTime: response ? response.elapsedTime : -1,
       error: error,
-      statusCode: response ? response.statusCode : 418
+      statusCode: statusCode
     };
     if(config.server.debug) {
       console.log(check.last);
