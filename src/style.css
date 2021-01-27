@@ -12,3 +12,7 @@
 .error {
   color: red;
 }
+
+.warning {
+  color: rgb(198, 110, 4);
+}

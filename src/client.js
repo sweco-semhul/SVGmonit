@@ -3,8 +3,21 @@ var svgElementId = 'svg-image';
 var statusQueue = [];
 
 
-function setStatus(code, check, name, msg) {
-  statusQueue.unshift('<span' + (code < 498 ? '' : ' class="error"') + '>' + (new Date()).toISOString() + ' ' + code + ' ' + (check ? ('<a href="' + check + '" target="_blank">' + name + '</a>') : '') + msg + '</span>');
+function generateStatusStr(code, check, name, msg) {
+  let errorClass = '';
+  if(code > 498) {
+    errorClass =  ' class="error"';
+  } else if (code > 299) {
+    errorClass =  ' class="warning"';
+  }
+  let now = (new Date()).toISOString();
+  let checkStr = check ? ('<a href="' + check + '" target="_blank">' + name + '</a>') : name;
+  let msgStr = msg || '';
+  return '<span' + errorClass + '>' + now + ' ' + code + ' ' + checkStr + ' ' + msgStr + '</span>';
+}
+
+function printStatus(code, check, name, msg) {
+  statusQueue.unshift(generateStatusStr(code, check, name, msg));
   document.getElementById(statusElementId).innerHTML = statusQueue.join('<br>');
   if(statusQueue.length > 100) {
     statusQueue.pop();
@@ -44,7 +57,7 @@ function updateSVG(jsonMsg, addEventListener) {
     } else {
       statusMsg = jsonMsg.last.statusCode + ' ' + jsonMsg.last.requestTime + 'ms';
     }
-    tooltip.children[0].getElementsByTagName('text')[0].innerHTML = jsonMsg.name + ' ' + jsonMsg.last.when + ' ' + statusMsg;
+    tooltip.children[0].getElementsByTagName('text')[0].innerHTML = encodeURIComponent(jsonMsg.name + ' ' + jsonMsg.last.when + ' ' + statusMsg);
 
     if(addEventListener) {
       // Add link from check
@@ -62,15 +75,21 @@ function updateSVG(jsonMsg, addEventListener) {
   //debugger;
 }
 
+function parseError(lastMessage) {
+  if(lastMessage.hasOwnProperty('error') && lastMessage.error != null) {
+    return JSON.stringify(lastMessage.error);
+  }
+  return '';
+}
 
 function initWS() {
   var wsUrl =  'ws://' + window.location.hostname + ':' +  config.client.wsPort;
   var ws = new WebSocket(wsUrl);
 
   // Bind to web socket events
-  ws.onclose   = function(event) { setStatus(500, null, 'Web socket connection closed'); }
-  ws.onerror   = function(event) { setStatus(500, null, JSON.stringify(event,0,2)); }
-  ws.onopen    = function(event) { setStatus(200, null, 'WebSocket connected to server at ' + wsUrl); };
+  ws.onclose   = function(event) { printStatus(500, null, 'Web socket', 'connection closed'); }
+  ws.onerror   = function(event) { printStatus(500, null, JSON.stringify(event,0,2)); }
+  ws.onopen    = function(event) { printStatus(200, null, 'Web socket', 'connected to server at ' + wsUrl); };
   ws.onmessage = function(event) { 
     var jsonMessage = JSON.parse(event.data);
     // TODO! create a better message format
@@ -79,13 +98,13 @@ function initWS() {
       jsonMessage.forEach(function(message) {
         message.url.split('\/\/')
         if(message.last) {
-          setStatus(message.last.statusCode, message.last.url, message.name, ' updated. ' + (JSON.stringify(message.last.error) || '') );
+          printStatus(message.last.statusCode, message.last.url, message.name, parseError(message.last) );
           updateSVG(message, true);
         }
       });
     } else {  
       // Set status and update svg
-      setStatus(jsonMessage.last.statusCode, jsonMessage.last.url, jsonMessage.name, ' updated. ' + (JSON.stringify(jsonMessage.last.error) && jsonMessage.last.error.code || '') );
+      printStatus(jsonMessage.last.statusCode, jsonMessage.last.url, jsonMessage.name, parseError(jsonMessage.last) );
       updateSVG(jsonMessage);
     }
   }
