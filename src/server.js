@@ -64,7 +64,7 @@ fs.readFile(__dirname + config.server.svgFile, function (err, data) {
   });
 });
 
-
+// Parse {*.APIKEY} and replace it with docker secret
 function parseKey(url) {
   let apiKeyNames = url.match(/{.*APIKEY}/);
   if(apiKeyNames && apiKeyNames.length > 0) {
@@ -80,6 +80,7 @@ function parseKey(url) {
   return url;
 }
 
+// Read docker secrets file
 function readSecrets() {
   const secrets = {};
   console.log(SECRETS_DIR);
@@ -166,7 +167,7 @@ function find(o, finder, changer) {
   return result;
 }
 
-
+// Send to all clients
 function sendAll(msg) {
   CLIENTS.forEach(ws => {
     ws.send(msg);
