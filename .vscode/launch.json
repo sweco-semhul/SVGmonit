@@ -10,7 +10,6 @@
       "name": "Launch Program",
       "cwd": "${workspaceFolder}/src",
       "program": "${workspaceFolder}/src/server.js",
-      "stopOnEntry": true
     }
   ]
 }
