@@ -24,13 +24,26 @@ wss.on('connection', ws => {
   sendAll(JSON.stringify(checks));
 });
 
-// Parse the SVG image
-var parser = new xml2js.Parser();
-fs.readFile(config.server.svgFile, function (err, data) {
-  if(err) {
-    console.log(err);
-  }
-  parser.parseString(data, function (err, result) {
+console.log('Loading svg from', config.server.svgFile);
+// If http url is set then load the svg from url otherwise load from file
+if(config.server.svgFile.indexOf('http') !== -1) {
+  request.get({
+    url: config.server.svgFile,
+  }, function (err, resp, body) { 
+    parseAndServ(body);
+  });
+} else {
+  fs.readFile(config.server.svgFile, function (err, data) {
+    if(err) {
+      console.log(err);
+    }
+    parseAndServ(data);
+  });
+}
+// Parse the SVG image and serve it
+function parseAndServ(svgData) {
+  var parser = new xml2js.Parser();
+  parser.parseString(svgData, function (err, result) {
     // Find CHECKS in the SVG 
     find(result.svg.g, function (o) {
       return o.hasOwnProperty('g') && o.g[0].hasOwnProperty('text') && o.g[0].text.find(i => i._.includes('CHECK'));
@@ -62,7 +75,7 @@ fs.readFile(config.server.svgFile, function (err, data) {
     check(checks);
     setInterval(function() { check(checks); }.bind(this), config.server.checkInterval);
   });
-});
+}
 
 // Parse {*.APIKEY} and replace it with docker secret
 function parseKey(url) {
