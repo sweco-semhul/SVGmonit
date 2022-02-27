@@ -20,8 +20,8 @@ const config = {
     wsPort: 19001,
     color: {
       ok: 'lime',
-      noResponse: 'orange',
-      notOk: 'red'
+      warning: 'orange',
+      error: 'red'
     }
   }
 };

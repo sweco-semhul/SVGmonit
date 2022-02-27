@@ -33,16 +33,12 @@ function updateSVG(jsonMsg, addEventListener) {
 
   // Change color of linked element
   var color;
-  switch (jsonMsg.last.statusCode) {
-    case 200:
-      color = config.client.color.ok;
-      break;
-    case 404:
-      color = config.client.color.notOk;
-      break;
-    default:
-      color = config.client.color.notOk;
-      break;
+  if(jsonMsg.last.statusCode < 400) {
+    color = config.client.color.ok;
+  } else if (jsonMsg.last.statusCode < 499) {
+    color = config.client.color.warning;
+  } else {
+    color = config.client.color.error;
   }
   var svgElement = svgDoc.getElementById(jsonMsg.id);
   if(svgElement) {
